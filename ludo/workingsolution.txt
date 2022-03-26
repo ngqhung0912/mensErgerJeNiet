@@ -1,0 +1,8 @@
+ conda create -n mensergerjeniet python=3.8
+  environment location: /Users/hungnguyen/miniforge3/envs/mensergerjeniet
+conda install numpy=1.19.5
+conda uninstall libcblas
+conda install --force-reinstall libcblas
+conda install numpy==1.19.5
+conda install -c apple tensorflow-deps=2.6
+python -m pip install tensorflow-macos==2.6.0
