@@ -1,7 +1,6 @@
 from ludo.ludo import make
 import numpy as np
 
-
 def random_player():
     """
         defines a random player: returns a random action regardless the gamestate
@@ -25,7 +24,7 @@ for _ in range(1000):
         obs, rew, done, info = env.step(action)
 
         # render for graphical representation of game state
-        # env.render()
+        env.render()
 
         # quit if game is finished
         if done:

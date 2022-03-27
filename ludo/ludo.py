@@ -83,7 +83,7 @@ class Renderer:
         pygame.init()
         pygame.font.init()  # you have to call this at the start,
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        self.image = pygame.image.load(r'board.png')
+        self.image = pygame.image.load(r'ludo/board.png')
         self.rect = self.image.get_rect()
         self.dice = Dice(self.screen)
 
