@@ -125,7 +125,7 @@ if __name__ == "__main__":
     hidden_units = [200, 200]
 
     # Initialize the environment
-    env = gym.make('MountainCar-v0')
+    env = gym.make('CartPole-v1')
 
     """ 
     Notice that we are not using any function to make the states discrete here as DQN 
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     copy_weights(policy_net, target_net)
 
     optimizer = tf.optimizers.Adam(lr)
-    epochs = 10000
+    epochs = 1000
 
     total_rewards = np.empty(epochs)
 
@@ -214,7 +214,7 @@ if __name__ == "__main__":
             tf.summary.scalar('Running_avg_reward', avg_rewards, step=epoch)
             tf.summary.scalar('Losses', mean(losses), step=epoch)
 
-        if epoch % 1000 == 0:
+        if epoch % 100 == 0:
             print(
                 f"Episode:{epoch} Episode_Reward:{total_rewards[epoch]} Avg_Reward:{avg_rewards: 0.1f} Losses:{mean(losses): 0.1f} rate:{rate: 0.8f} flag:{flag}")
 

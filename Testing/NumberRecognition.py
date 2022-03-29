@@ -3,7 +3,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import keras
-
 ## loading data
 from keras.datasets import mnist
 
