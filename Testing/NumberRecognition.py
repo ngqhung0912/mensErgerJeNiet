@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
 
 
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
+import keras
 
 ## loading data
 from keras.datasets import mnist
@@ -53,10 +52,10 @@ print(Y_train.shape, Y_test.shape)
 Nclasses = Y_test.shape[1]
 
 
-def CreateModel():
+def createModel():
     ## create model instance
     model = Sequential()
-    ## call add memeber function of model to append some layer
+    ## call add member function of model to append some layer
     model.add(Dense(300, input_dim=Npixels, kernel_initializer='normal',
                     activation="relu"))
     ## add first hidden layer always match input and dimension of actual
@@ -68,7 +67,7 @@ def CreateModel():
     ## since we have 10 digits 0..9 ->
     model.add(Dense(Nclasses, input_dim=100,
                     kernel_initializer="normal", activation="softmax"))
-    ## and last keras allows us to compile the model to get all the compute power
+    ## and last keras allows us to compile the model to get all computing power
     ## available, and we can define a optimizer and a loss function
     model.compile(loss="categorical_crossentropy", optimizer="adam",
                   metrics=['accuracy'])
@@ -76,7 +75,7 @@ def CreateModel():
 
 
 ## create an instance of our model
-model = CreateModel()
+model = createModel()
 
 ## train the model
 ## the train function allows you to alter number of epochs , batch_size ...,
@@ -87,3 +86,17 @@ model.fit(X_train, Y_train, validation_data=(X_test, Y_test),
 # Final evaluation of the model
 quality = model.evaluate(X_test, Y_test, verbose=0)
 print("Model Error: %.2f%%" % (100 - quality[1] * 100))
+
+
+model.save("TestModel")
+
+Model_Load = reconstructed_model = keras.models.load_model("TestModel")
+num=103
+plt.imshow( X_test[ num , : ].reshape( 28 , 28 ) )
+## and now predict model outcome
+x = np.reshape( X_test[ num , : ] , ( 1 , Npixels ) )
+result = Model_Load.predict( x )
+print( result.shape )
+## extract result from the one-hot encoding by looking
+## for where the softmax output is maximal
+print( "The digit in your image should be " , np.argmax( Y_test[ num , : ] ) , "and the network says " , np.argmax( result ))
