@@ -1,6 +1,7 @@
 from ludo.ludo import make
 import numpy as np
 
+
 def random_player():
     """
         defines a random player: returns a random action regardless the gamestate
@@ -30,4 +31,3 @@ for _ in range(1000):
         if done:
             winner_list.append(info['player'])
             break
-

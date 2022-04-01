@@ -214,7 +214,8 @@ if __name__ == "__main__":
             tf.summary.scalar('Running_avg_reward', avg_rewards, step=epoch)
             tf.summary.scalar('Losses', mean(losses), step=epoch)
 
-        if epoch % 100 == 0:
+        if epoch % 100 == 0 and epoch != 0:
+            env.render()
             print(
                 f"Episode:{epoch} Episode_Reward:{total_rewards[epoch]} Avg_Reward:{avg_rewards: 0.1f} Losses:{mean(losses): 0.1f} rate:{rate: 0.8f} flag:{flag}")
 
