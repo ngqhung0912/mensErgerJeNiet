@@ -1,17 +1,16 @@
-import PlayerType
-
+import numpy as np
 
 class Player:
-    def __init__(self, player_index: int, player_type: PlayerType):
+    def __init__(self):
         self.current_reward = 0
         self.reward_list = []
-        self.type = player_type
-        self.player_index = player_index
 
-    def player(self):
+    def load_model(self):
         pass
 
-    def handle_game_state(self, rew: int, obs: list, done: bool, info: dict):
-        self.current_reward = rew
-        self.reward_list.append(rew)
+    def handle_reward(self,obs: list, reward: int):
+        pass
+
+    def handle_move(self, obs: list, info: dict) -> np.ndarray:
+        pass
 

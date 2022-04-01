@@ -133,6 +133,9 @@ class Game:
         if self.render_valid:
             self.renderer = Renderer()
 
+    def get_reward(self):
+        return 0
+
     def roll_dice(self):
         self.eyes = self.rng.integers(1, 7)
         return self.eyes
