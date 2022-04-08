@@ -15,10 +15,10 @@ model_name = 'ludo'
 progress = []
 num_wins = 0
 # reset the game
-num_episodes = 100
+num_episodes = 10000
 PLAYER2COLOR = ['Yellow', 'Red', 'Blue', 'Green']
 player1 = RandomPlayer()
-training_player = QPlayer(model_name, epsilon=1)
+training_player = QPlayer(model_name, epsilon=1, episodes=num_episodes)
 player3 = RandomPlayer()
 player4 = RandomPlayer()
 # create a list of players

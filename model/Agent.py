@@ -10,18 +10,17 @@ import random
 
 
 class Agent:
-    def __init__(self, model_name: str, discount_rate: float, learning_rate: float):
+    def __init__(self, model_name: str, discount_rate: float, learning_rate: float, episodes: int):
 
         # Main model
-        # self.model = self.create_model()
-        self.model = tf.keras.models.\
-            load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__model_1500__21-100-100-50-50-4__0.3.model')
-
-        self.replay_memory_size = 50000
+        self.model = self.create_model()
+        # self.model = tf.keras.models.\
+        #     load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__model_1500__21-100-100-50-50-4__0.3.model')
+        self.replay_memory_size = 100000
         self.min_replay_memory_size = 1000
         self.minibatch_size = 64
         self.update_target_range = 5
-        self.update_logs = 100
+        self.update_logs = 1000
         self.model_name = model_name
         self.discount_rate = discount_rate
         self.input_shape = 21
@@ -29,9 +28,9 @@ class Agent:
         self.learning_rate = learning_rate
         self.log_num = 0
         # Target network
-        # self.target_model = self.create_model()
-        self.target_model = tf.keras.models.\
-            load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__target_model_1500__21-100-100-50-50-4__0.3.model')
+        self.target_model = self.create_model()
+        # self.target_model = tf.keras.models.\
+        #     load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__target_model_1500__21-100-100-50-50-4__0.3.model')
 
         self.target_model.set_weights(self.model.get_weights())
 
@@ -39,7 +38,7 @@ class Agent:
         self.replay_memory = deque(maxlen=self.replay_memory_size)
 
         # Custom tensorboard object
-        self.tensorboard = mtb(log_dir="logs/{}-{}".format(model_name, int(time.time())))
+        self.tensorboard = mtb(log_dir="logs/lr={}-dr={}-num_eps={}".format(learning_rate, discount_rate, episodes))
 
         # Used to count when to update target network xwith main network's weights
         self.target_update_counter = 0
@@ -96,7 +95,6 @@ class Agent:
             # current_qs[action] = new_q
             current_qs_list[index] = new_q
 
-
             # And append to our training data
             input_batch.append(current_state)
             output_batch.append(current_qs_list[index])
@@ -129,8 +127,8 @@ class Agent:
 
     def save_model(self, progress):
         self.model.save(
-            f'models/ludo__model_1500__21-100-100-50-50-4__{progress}.model')
+            f'models/ludo__model_1500__21-100-100-50-50-4__.model')
 
         self.target_model.save(
-            f'models/ludo__target_model_1500__21-100-100-50-50-4__{progress}.model')
+            f'models/ludo__target_model_1500__21-100-100-50-50-4__.model')
 
