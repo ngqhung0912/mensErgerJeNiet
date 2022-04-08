@@ -130,6 +130,7 @@ class Game:
         self.render_valid = render
         self.eyes = ''
         self.current_player = 0
+        self.previous_obs = None
         if self.render_valid:
             self.renderer = Renderer()
 
@@ -141,9 +142,9 @@ class Game:
         # returns the game state
         info = {'player': self.current_player,
                 'eyes': self.eyes}
-        reward = 0  # currently always zero
         obs = [player.obs() for player in self.players]
-
+        reward = 0  # currently, always zero
+        self.previous_obs = obs
         # compute if a player has won
         done = False
         for state in obs:
