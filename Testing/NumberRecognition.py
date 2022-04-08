@@ -71,22 +71,23 @@ def create_model():
     return model
 
 
-## create an instance of our model
-model = create_model()
+#
+# ## create an instance of our model
+# model = create_model()
+#
+# ## train the model
+# ## the train function allows you to alter number of epochs , batch_size ...,
+# model.fit(X_train, Y_train, validation_data=(X_test, Y_test),
+#           epochs=50, batch_size=200, verbose=2)
+#
+# ## lets check how accurate the model is on your test data
+# # Final evaluation of the model
+# quality = model.evaluate(X_test, Y_test, verbose=0)
+# print("Model Error: %.2f%%" % (100 - quality[1] * 100))
 
-## train the model
-## the train function allows you to alter number of epochs , batch_size ...,
-model.fit(X_train, Y_train, validation_data=(X_test, Y_test),
-          epochs=50, batch_size=200, verbose=2)
+# model.save("TestModel")
 
-## lets check how accurate the model is on your test data
-# Final evaluation of the model
-quality = model.evaluate(X_test, Y_test, verbose=0)
-print("Model Error: %.2f%%" % (100 - quality[1] * 100))
-
-model.save("TestModel")
-
-Model_Load = reconstructed_model = keras.models.load_model("../../Testing/TestModel")
+Model_Load = reconstructed_model = keras.models.load_model("TestModel")
 num = 103
 plt.imshow(X_test[num, :].reshape(28, 28))
 ## and now predict model outcome

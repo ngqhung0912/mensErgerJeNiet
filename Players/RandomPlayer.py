@@ -1,14 +1,17 @@
 from Players.Player import Player
 import numpy as np
 
-global action
 global random_player
+
 
 class RandomPlayer(Player):
     def __init__(self):
         super(RandomPlayer, self).__init__()
 
     def handle_move(self, obs: list, info: dict):
+        self.index = info['player']
+        self.dice = info['eyes']
+        # Player.generate_nn_input(relative_position)
         return np.random.random_sample(size=4)
 
 
@@ -33,8 +36,3 @@ def main():
 
 
 main()
-
-
-
-
-

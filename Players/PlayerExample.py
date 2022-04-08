@@ -2,6 +2,8 @@
 import numpy as np
 from Players.Player import Player
 
+global action
+
 
 class PlayerExample(Player):
     def __init__(self):
