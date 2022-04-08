@@ -43,8 +43,8 @@ class Agent:
         model = Sequential()
         model.add(Dense(100, input_dim=21, kernel_initializer='normal',
                         activation="relu"))
-        # model.add(Dense(50, input_dim=100,
-        #                 kernel_initializer="normal", activation="relu"))
+        model.add(Dense(50, input_dim=100,
+                        kernel_initializer="normal", activation="relu"))
         model.add(Dense(4, input_dim=100,
                         kernel_initializer="normal", activation="softmax"))
         model.compile(loss="categorical_crossentropy", optimizer=Adam(learning_rate=0.001), metrics=['categorical_crossentropy'])

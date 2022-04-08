@@ -17,10 +17,6 @@ class QPlayer(Player):
         self.min_epsilon = 0.001
         self.epsilon_decay = 0.99975
 
-    def handle_nn_input(self, pos: list):
-        pos = np.array(pos).reshape((20, 1))
-        nn_input = np.append(pos, self.dice).reshape((21, 1))
-        return nn_input
 
     def handle_move(self, obs: list, info: dict) -> np.ndarray:
         self.index = info['player']
@@ -28,7 +24,8 @@ class QPlayer(Player):
         self.relative_position = Player.calculate_relative_position(self, obs)
         if np.random.random() > self.epsilon:
             nn_input = self.handle_nn_input(self.relative_position)
-            move = np.argmax(self.agent.get_qs(nn_input))
+            move = self.agent.get_qs(nn_input).reshape((4,))
+
         else:
             move = np.random.random_sample(size=4)
         return move

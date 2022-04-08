@@ -59,6 +59,10 @@ class Player:
         relative_position.insert(0, player_obs)
         return relative_position
 
-
     def handle_move(self, obs: list, info: dict):
         pass
+
+    def handle_nn_input(self, pos: list):
+        pos = np.array(pos).reshape((20, 1))
+        nn_input = np.append(pos, self.dice).reshape((21, 1))
+        return nn_input
