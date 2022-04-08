@@ -21,10 +21,11 @@ player4 = RandomPlayer()
 players = [player1, training_player, player3, player4]
 
 start_time = time.time()
-for episode in range(1, num_episodes+1):
-    if episode % 10 == 0:
+for episode in range(1, num_episodes + 1):
+    if episode % 100 == 0:
         end_10_eps_time = time.time()
-        print(end_10_eps_time - start_time)
+        print(end_10_eps_time - start_time)+6.
+
         start_time = end_10_eps_time
 
     training_player.agent.tensorboard.step = episode
@@ -55,8 +56,6 @@ for episode in range(1, num_episodes+1):
 
         training_player.save_previous_obs(obs)
 
-
-
         # render for graphical representation of game state
         # env.render()
     # compute the winner / ranking
@@ -73,18 +72,17 @@ for episode in range(1, num_episodes+1):
     training_player.update_memory(action, reward, done)
     training_player.agent.train(done)
 
-
     if not episode % AGGREGATE_STATS_EVERY or episode == 1:
-        average_reward = sum(episode_rewards_list[-AGGREGATE_STATS_EVERY:])/len(episode_rewards_list[-AGGREGATE_STATS_EVERY:])
+        average_reward = sum(episode_rewards_list[-AGGREGATE_STATS_EVERY:]) / len(
+            episode_rewards_list[-AGGREGATE_STATS_EVERY:])
         min_reward = min(episode_rewards_list[-AGGREGATE_STATS_EVERY:])
         max_reward = max(episode_rewards_list[-AGGREGATE_STATS_EVERY:])
-        training_player.agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=training_player.epsilon)
+        training_player.agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward,
+                                                       reward_max=max_reward, epsilon=training_player.epsilon)
         # Save model, but only when min reward is greater or equal a set value
-        # if min_reward >= MIN_REWARD:
-        #     training_player.agent.model.save(f'models/{model_name}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.model')
     training_player.handle_endgame()
 
 plt.plot(episode_rewards_list)
-plt.savefig('trial2.png')
-
-
+plt.savefig('test_q.png')
+training_player.agent.model.save(
+    f'models/{model_name}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.model')

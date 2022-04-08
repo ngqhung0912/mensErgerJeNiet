@@ -19,12 +19,13 @@ class Agent:
         self.min_replay_memory_size = 1000
         self.minibatch_size = 64
         self.update_target_range = 5
+        self.update_logs = 100
         self.model_name = model_name
         self.discount_rate = discount_rate
         self.input_shape = 21
         self.output_shape = 4
         self.learning_rate = learning_rate
-
+        self.log_num = 0
         # Target network
         self.target_model = self.create_model()
         self.target_model.set_weights(self.model.get_weights())
@@ -97,11 +98,15 @@ class Agent:
 
         # Fit on all samples as one batch, log only on terminal state
         self.model.fit(np.array(input_batch).reshape(64, 21), np.array(output_batch).reshape(64, 4), batch_size=self.minibatch_size, verbose=0,
-                   shuffle=False, callbacks=[self.tensorboard] if terminal_state else None)
+                   shuffle=False, callbacks=[self.tensorboard] if self.log_num == self.update_logs else None)
 
         # Update target network counter every episode
         if terminal_state:
             self.target_update_counter += 1
+            self.log_num += 1
+
+        if self.log_num == self.update_logs:
+            self.log_num = 0
 
         # If counter reaches set value, update target network with weights of main network
         if self.target_update_counter > self.update_target_range:
