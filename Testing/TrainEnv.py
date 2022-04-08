@@ -20,7 +20,13 @@ player4 = RandomPlayer()
 # create a list of players
 players = [player1, training_player, player3, player4]
 
+start_time = time.time()
 for episode in range(1, num_episodes+1):
+    if episode % 10 == 0:
+        end_10_eps_time = time.time()
+        print(end_10_eps_time - start_time)
+        start_time = end_10_eps_time
+
     training_player.agent.tensorboard.step = episode
     episode_reward = 0
     step = 1
@@ -43,8 +49,9 @@ for episode in range(1, num_episodes+1):
 
         if isinstance(current_player, QPlayer):
             episode_reward += current_player.handle_reward(obs, info['player'])
-            training_player.update_memory(action, reward, done)
-            training_player.agent.train(done)
+            if not done:
+                training_player.update_memory(action, reward, done)
+                training_player.agent.train(done)
 
         training_player.save_previous_obs(obs)
 
@@ -63,6 +70,9 @@ for episode in range(1, num_episodes+1):
 
     episode_reward += final_reward
     episode_rewards_list.append(episode_reward)
+    training_player.update_memory(action, reward, done)
+    training_player.agent.train(done)
+
 
     if not episode % AGGREGATE_STATS_EVERY or episode == 1:
         average_reward = sum(episode_rewards_list[-AGGREGATE_STATS_EVERY:])/len(episode_rewards_list[-AGGREGATE_STATS_EVERY:])

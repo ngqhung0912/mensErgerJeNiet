@@ -35,18 +35,18 @@ class Agent:
         # Custom tensorboard object
         self.tensorboard = mtb(log_dir="logs/{}-{}".format(model_name, int(time.time())))
 
-        # Used to count when to update target network with main network's weights
+        # Used to count when to update target network xwith main network's weights
         self.target_update_counter = 0
 
     def create_model(self):
         model = Sequential()
-        model.add(Dense(300, input_dim=21, kernel_initializer='normal',
+        model.add(Dense(100, input_dim=21, kernel_initializer='normal',
                         activation="relu"))
-        model.add(Dense(100, input_dim=300,
-                        kernel_initializer="normal", activation="relu"))
+        # model.add(Dense(50, input_dim=100,
+        #                 kernel_initializer="normal", activation="relu"))
         model.add(Dense(4, input_dim=100,
                         kernel_initializer="normal", activation="softmax"))
-        model.compile(loss="categorical_crossentropy", optimizer=Adam(learning_rate=0.001), metrics=['accuracy'])
+        model.compile(loss="categorical_crossentropy", optimizer=Adam(learning_rate=0.001), metrics=['categorical_crossentropy'])
         return model
 
     # Adds step's data to a memory replay array
@@ -96,7 +96,7 @@ class Agent:
             output_batch.append(current_qs_list[index])
 
         # Fit on all samples as one batch, log only on terminal state
-        self.model.fit(np.array(input_batch).reshape(64,21), np.array(output_batch).reshape(64,4), batch_size=self.minibatch_size, verbose=0,
+        self.model.fit(np.array(input_batch).reshape(64, 21), np.array(output_batch).reshape(64, 4), batch_size=self.minibatch_size, verbose=0,
                    shuffle=False, callbacks=[self.tensorboard] if terminal_state else None)
 
         # Update target network counter every episode
