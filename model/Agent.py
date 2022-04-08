@@ -56,23 +56,21 @@ class Agent:
 
     # Trains main network every step during episode
     def train(self, terminal_state):
-
+        current_qs_list = []
+        future_qs_list = []
         # Start training only if certain number of samples is already saved
         if len(self.replay_memory) < self.min_replay_memory_size:
             return
 
         # Get a minibatch of random samples from memory replay table
         minibatch = random.sample(self.replay_memory, self.minibatch_size)
-
         # Get current states from minibatch, then query NN model for Q values
-        current_states = np.array([transition[0] for transition in minibatch])  # normalize
-        current_qs_list = self.model.predict(current_states)
-
+        current_states = np.array([transition[0] for transition in minibatch]).reshape(64, 21)  # normalize
+        current_qs_list = self.model.predict(current_states, batch_size=64)
         # Get future states from minibatch, then query NN model for Q values
         # When using target network, query it, otherwise main network should be queried
-        new_current_states = np.array([transition[3] for transition in minibatch])   # normalize
+        new_current_states = np.array([transition[3] for transition in minibatch]).reshape(64, 21)   # normalize
         future_qs_list = self.target_model.predict(new_current_states)
-
         input_batch = []
         output_batch = []
 
@@ -88,16 +86,18 @@ class Agent:
                 new_q = reward
 
             # Update Q value for given state
-            current_qs = current_qs_list[index]
-            current_qs[action] = new_q
+            # current_qs = current_qs_list[index]
+            # current_qs[action] = new_q
+            current_qs_list[index] = new_q
+
 
             # And append to our training data
             input_batch.append(current_state)
-            output_batch.append(current_qs)
+            output_batch.append(current_qs_list[index])
 
         # Fit on all samples as one batch, log only on terminal state
-        self.model.fit(np.array(input_batch), np.array(output_batch), batch_size=self.minibatch_size, verbose=0,
-                       shuffle=False, callbacks=[self.tensorboard] if terminal_state else None)
+        self.model.fit(np.array(input_batch).reshape(64,21), np.array(output_batch).reshape(64,4), batch_size=self.minibatch_size, verbose=0,
+                   shuffle=False, callbacks=[self.tensorboard] if terminal_state else None)
 
         # Update target network counter every episode
         if terminal_state:
@@ -110,4 +110,5 @@ class Agent:
 
     # Queries main network for Q values given current observation space (environment state)
     def get_qs(self, state: list):
-        return self.model.predict(np.array(state))
+        state = np.array(state).reshape((1, 21))
+        return self.model.predict(state)
