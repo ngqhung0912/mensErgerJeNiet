@@ -88,15 +88,17 @@ for episode in range(1, num_episodes + 1):
         # Save model, but only when min reward is greater or equal a set value
     training_player.handle_endgame()
     progress.append(num_wins/episode)
-
+plt.figure(1)
 plt.plot(episode_rewards_list)
 plt.savefig('rewards.png')
 
 print(num_wins)
 
+
+plt.figure(2)
 plt.plot(progress)
 plt.savefig('training_progress.png')
 
+training_player.agent.save_model(progress[-1])
 
-training_player.agent.model.save(
-    f'models/{model_name}__train_1500__21-100-100-50-50-4.model__{progress[-1]}')
+

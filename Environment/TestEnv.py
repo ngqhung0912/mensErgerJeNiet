@@ -21,7 +21,7 @@ players = [player1, q_player, player3, player4]
 start = time.time()
 for episode in range(1, num_episodes + 1):
     if episode % 100 == 0:
-        print(num_wins)
+        print("win per", episode, ":", num_wins)
 
     # create an instance of the game with 4 players
     env = make(num_players=4)
@@ -43,7 +43,7 @@ for episode in range(1, num_episodes + 1):
     # print(f'Player {players[winner].index} has won!', obs)
     if players[winner] == q_player:
         num_wins += 1
-    progress.append(num_wins)
+    progress.append(num_wins/episode)
 
 print(num_wins)
 plt.plot(progress)

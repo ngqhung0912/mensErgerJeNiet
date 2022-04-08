@@ -87,6 +87,7 @@ class QPlayer(Player):
             self.epsilon = max(self.min_epsilon, self.epsilon)
 
 
+
 # def player(obs, info):
 #     """
 #     defines a random player: returns a random action as a (4,) numpy array

@@ -13,7 +13,9 @@ class Agent:
     def __init__(self, model_name: str, discount_rate: float, learning_rate: float):
 
         # Main model
-        self.model = self.create_model()
+        # self.model = self.create_model()
+        self.model = tf.keras.models.\
+            load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__model_1500__21-100-100-50-50-4__0.3.model')
 
         self.replay_memory_size = 50000
         self.min_replay_memory_size = 1000
@@ -27,7 +29,10 @@ class Agent:
         self.learning_rate = learning_rate
         self.log_num = 0
         # Target network
-        self.target_model = self.create_model()
+        # self.target_model = self.create_model()
+        self.target_model = tf.keras.models.\
+            load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__target_model_1500__21-100-100-50-50-4__0.3.model')
+
         self.target_model.set_weights(self.model.get_weights())
 
         # An array with last n steps for training
@@ -97,8 +102,12 @@ class Agent:
             output_batch.append(current_qs_list[index])
 
         # Fit on all samples as one batch, log only on terminal state
-        self.model.fit(np.array(input_batch).reshape(64, 21), np.array(output_batch).reshape(64, 4), batch_size=self.minibatch_size, verbose=0,
-                   shuffle=False, callbacks=[self.tensorboard] if self.log_num == self.update_logs else None)
+        self.model.fit(np.array(input_batch).reshape(64, 21),
+                       np.array(output_batch).reshape(64, 4),
+                       batch_size=self.minibatch_size,
+                       verbose=0,
+                       shuffle=False,
+                       callbacks=[self.tensorboard] if self.log_num == self.update_logs else None)
 
         # Update target network counter every episode
         if terminal_state:
@@ -117,3 +126,11 @@ class Agent:
     def get_qs(self, state: list):
         state = np.array(state).reshape((1, 21))
         return self.model.predict(state)
+
+    def save_model(self, progress):
+        self.model.save(
+            f'models/ludo__model_1500__21-100-100-50-50-4__{progress}.model')
+
+        self.target_model.save(
+            f'models/ludo__target_model_1500__21-100-100-50-50-4__{progress}.model')
+

@@ -13,7 +13,8 @@ from Players.Player import Player
 class LoadedQPlayer(Player):
     def __init__(self):
         super().__init__()
-        self.loaded_model = tf.keras.models.load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo_____8.20max____4.20avg____2.15min__1649439603.model')
+        self.loaded_model = tf.keras.models.\
+            load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__train_1500__21-100-100-50-50-4.model__0.26')
         self.relative_position = None
 
 
