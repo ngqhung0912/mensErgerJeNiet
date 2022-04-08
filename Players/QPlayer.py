@@ -15,27 +15,40 @@ class QPlayer(Player):
         self.agent = Agent(model_name, discount_rate=0.99, learning_rate=0.001)
         self.epsilon = epsilon
         self.min_epsilon = 0.001
+        self.epsilon_decay = 0.99975
 
-    def handle_nn_input(self, relative_position: list):
-        relative_position = np.array(relative_position).reshape((20, 1))
-        nn_input = np.append(relative_position, self.dice).reshape((21, 1))
+    def handle_nn_input(self, pos: list):
+        pos = np.array(pos).reshape((20, 1))
+        nn_input = np.append(pos, self.dice).reshape((21, 1))
         return nn_input
-
 
     def handle_move(self, obs: list, info: dict) -> np.ndarray:
         self.index = info['player']
         self.dice = info['eyes']
+        self.relative_position = Player.calculate_relative_position(self, obs)
         if np.random.random() > self.epsilon:
-            self.relative_position = Player.calculate_relative_position(self, obs)
             nn_input = self.handle_nn_input(self.relative_position)
             move = np.argmax(self.agent.get_qs(nn_input))
         else:
             move = np.random.random_sample(size=4)
-
         return move
 
     def save_previous_obs(self, obs: list):
         self.previous_obs = obs
+
+    def update_memory(self, action, reward, done):
+
+        prev_relative_pos = self.calculate_relative_position(self.previous_obs)
+        prev_nn_input = self.handle_nn_input(prev_relative_pos)
+        current_nn_input = self.handle_nn_input(self.relative_position)
+        self.agent.update_replay_memory([
+            prev_nn_input,
+            action,
+            reward,
+            current_nn_input,
+            done
+        ])
+        return
 
     def handle_reward(self, obs: list, current_player: int):
         reward = 0
@@ -58,7 +71,8 @@ class QPlayer(Player):
 
         previous_relative_position.pop(0)
         previous_relative_position = np.array(previous_relative_position).reshape((16, 1))
-        current_relative_position = self.relative_position
+        current_relative_position = self.relative_position.copy()
+
         current_relative_position.pop(0)
         current_relative_position = np.array(current_relative_position).reshape((16, 1))
         for i in range(previous_relative_position.shape[0]):
@@ -70,10 +84,12 @@ class QPlayer(Player):
                 reward += 0.25
         return reward
 
-    def handle_endgame(self, average_reward: float, min_reward: float, max_reward: float):
-        self.agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=self.epsilon)
+    def handle_endgame(self):
+        if self.epsilon > self.min_epsilon:
+            self.epsilon *= self.epsilon_decay
+            self.epsilon = max(self.min_epsilon, self.epsilon)
 
-#
+
 # def player(obs, info):
 #     """
 #     defines a random player: returns a random action as a (4,) numpy array
