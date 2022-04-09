@@ -3,7 +3,6 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
-import tensorflow as tf
 from collections import deque
 import time
 import random
@@ -18,7 +17,7 @@ class Agent:
         #     load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__model_1500__21-100-100-50-50-4__0.3.model')
         self.replay_memory_size = 100000
         self.min_replay_memory_size = 1000
-        self.minibatch_size = 64
+        self.minibatch_size = 128
         self.update_target_range = 5
         self.update_logs = 1000
         self.model_name = model_name
@@ -70,11 +69,11 @@ class Agent:
         # Get a minibatch of random samples from memory replay table
         minibatch = random.sample(self.replay_memory, self.minibatch_size)
         # Get current states from minibatch, then query NN model for Q values
-        current_states = np.array([transition[0] for transition in minibatch]).reshape(64, 21)  # normalize
-        current_qs_list = self.model.predict(current_states, batch_size=64)
+        current_states = np.array([transition[0] for transition in minibatch]).reshape(self.minibatch_size, 21)  # normalize
+        current_qs_list = self.model.predict(current_states, batch_size=self.minibatch_size)
         # Get future states from minibatch, then query NN model for Q values
         # When using target network, query it, otherwise main network should be queried
-        new_current_states = np.array([transition[3] for transition in minibatch]).reshape(64, 21)   # normalize
+        new_current_states = np.array([transition[3] for transition in minibatch]).reshape(self.minibatch_size, 21)   # normalize
         future_qs_list = self.target_model.predict(new_current_states)
         input_batch = []
         output_batch = []
@@ -100,8 +99,8 @@ class Agent:
             output_batch.append(current_qs_list[index])
 
         # Fit on all samples as one batch, log only on terminal state
-        self.model.fit(np.array(input_batch).reshape(64, 21),
-                       np.array(output_batch).reshape(64, 4),
+        self.model.fit(np.array(input_batch).reshape(self.minibatch_size, 21),
+                       np.array(output_batch).reshape(self.minibatch_size, 4),
                        batch_size=self.minibatch_size,
                        verbose=0,
                        shuffle=False,
