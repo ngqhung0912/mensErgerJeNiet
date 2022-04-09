@@ -38,7 +38,8 @@ class Agent:
         self.replay_memory = deque(maxlen=self.replay_memory_size)
 
         # Custom tensorboard object
-        self.tensorboard = mtb(log_dir="logs/lr={}-dr={}-num_eps={}".format(learning_rate, discount_rate, episodes))
+        self.tensorboard = mtb(log_dir="logs/lr={}-dr={}-num_eps={}-reward_factor{}".
+                               format(learning_rate, discount_rate, episodes, 10))
 
         # Used to count when to update target network xwith main network's weights
         self.target_update_counter = 0

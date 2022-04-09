@@ -12,10 +12,10 @@ class QPlayer(Player):
         super(QPlayer, self).__init__()
         self.previous_obs = None
         self.relative_position = None
-        self.agent = Agent(model_name, discount_rate=0.99, learning_rate=0.001, episodes=episodes)
+        self.agent = Agent(model_name, discount_rate=0.8, learning_rate=0.005, episodes=episodes)
         self.epsilon = epsilon
         self.min_epsilon = 0.001
-        self.epsilon_decay = 0.99975
+        self.epsilon_decay = 0.998
 
 
     def handle_move(self, obs: list, info: dict) -> np.ndarray:
@@ -56,15 +56,15 @@ class QPlayer(Player):
         current_obs = obs[self.index]
         last_obs = self.previous_obs[self.index]
         if max(current_obs) > max(last_obs):  # reward to moving closer to homebase
-            reward += 0.1
+            reward += 0.1*10
 
         for i in range(len(last_obs)):
             if last_obs[i] == current_obs[i]:
                 continue
             elif last_obs[i] != 0 and current_obs[i] == 0:  # punish for being knocked
-                reward -= 0.25
+                reward -= 0.25*10
             elif last_obs[i] == 0 and current_obs[i] != 0:  # reward for releasing a piece
-                reward += 0.25
+                reward += 0.25*10
 
         previous_relative_position.pop(0)
         previous_relative_position = np.array(previous_relative_position).reshape((16, 1))
@@ -74,11 +74,11 @@ class QPlayer(Player):
         current_relative_position = np.array(current_relative_position).reshape((16, 1))
         for i in range(previous_relative_position.shape[0]):
             if previous_relative_position[i] > 0 and current_relative_position[i] == 0:  # kicked a pawn
-                reward += 0.15
+                reward += 0.15*10
             elif previous_relative_position[i] < 0 and \
                     previous_relative_position[i] - current_relative_position[i] < -6 \
                     and current_relative_position[i] != 0:
-                reward += 0.25
+                reward += 0.25*10
         return reward
 
     def handle_endgame(self):

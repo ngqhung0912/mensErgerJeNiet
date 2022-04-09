@@ -15,7 +15,7 @@ model_name = 'ludo'
 progress = []
 num_wins = 0
 # reset the game
-num_episodes = 10000
+num_episodes = 3000
 PLAYER2COLOR = ['Yellow', 'Red', 'Blue', 'Green']
 player1 = RandomPlayer()
 training_player = QPlayer(model_name, epsilon=1, episodes=num_episodes)
@@ -68,9 +68,9 @@ for episode in range(1, num_episodes + 1):
     winner = np.argsort(scores)[-1]
     # print(f'Player {players[winner].index} has won!', obs)
     if players[winner] != training_player:
-        final_reward = -1
+        final_reward = -1*10
     else:
-        final_reward = 1
+        final_reward = 1*10
         num_wins += 1
 
     episode_reward += final_reward
