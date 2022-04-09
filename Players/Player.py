@@ -9,6 +9,7 @@ class Player:
         self.reward_list = []
         self.dice = None
         self.previous_obs = None
+        self.relative_position = None
 
     def load_model(self):
         pass
@@ -62,7 +63,10 @@ class Player:
     def handle_move(self, obs: list, info: dict):
         pass
 
-    def handle_nn_input(self, pos: list):
+    def handle_nn_input(self, pos: list,  ):
         pos = np.array(pos).reshape((20, 1))
         nn_input = np.append(pos, self.dice).reshape((21, 1))
         return nn_input
+
+    def save_previous_obs(self, obs: list):
+        self.previous_obs = obs

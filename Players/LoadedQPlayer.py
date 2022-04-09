@@ -7,9 +7,8 @@ class LoadedQPlayer(Player):
     def __init__(self):
         super().__init__()
         self.loaded_model = tf.keras.models.\
-            load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__model_1500__21-100-100-50-50-4__.model')
+            load_model('models/ludo__model_1500__21-100-100-50-50-4__.model')
         self.relative_position = None
-
 
     def handle_move(self, obs: list, info: dict):
         self.index = info['player']
