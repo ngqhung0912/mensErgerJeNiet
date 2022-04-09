@@ -43,9 +43,10 @@ for episode in range(1, num_episodes + 1):
     # print(f'Player {players[winner].index} has won!', obs)
     if players[winner] == q_player:
         num_wins += 1
-    progress.append(num_wins/episode)
+
+    if episode % 20 == 0:
+        progress.append(num_wins/episode)
 
 print(num_wins)
 plt.plot(progress)
 plt.savefig('progress of test env.')
-

@@ -1,8 +1,6 @@
 from Players.Player import Player
 import numpy as np
-import os
 from model.Agent import Agent
-
 
 global Q_player
 
@@ -12,11 +10,15 @@ class QPlayer(Player):
         super(QPlayer, self).__init__()
         self.previous_obs = None
         self.relative_position = None
-        self.agent = Agent(model_name, discount_rate=0.99, learning_rate=0.001, episodes=episodes)
+        self.agent = Agent(model_name, discount_rate=0.7, learning_rate=0.01, episodes=episodes)
         self.epsilon = epsilon
         self.min_epsilon = 0.001
-        self.epsilon_decay = 0.99975
+        self.epsilon_decay = (self.epsilon - self.min_epsilon) / episodes
 
+        self.info_array = ['epsilon = {}'.format(self.epsilon),
+                           'learning rate = {}'.format(self.agent.learning_rate),
+                           'discount rate = {}'.format(self.agent.discount_rate),
+                           'neural network = 21 - 100, 100 - 50, 50 - 4']
 
     def handle_move(self, obs: list, info: dict) -> np.ndarray:
         self.index = info['player']
@@ -83,10 +85,21 @@ class QPlayer(Player):
 
     def handle_endgame(self):
         if self.epsilon > self.min_epsilon:
-            self.epsilon *= self.epsilon_decay
+            self.epsilon -= self.epsilon_decay
             self.epsilon = max(self.min_epsilon, self.epsilon)
 
-
+    def update_tensorboard_stats(self, episode_rewards_list: list, win_rate: float, aggregate_stats,
+                                 time):
+        average_reward = sum(episode_rewards_list[-aggregate_stats:]) / len(
+            episode_rewards_list[-aggregate_stats:])
+        min_reward = min(episode_rewards_list[-aggregate_stats:])
+        max_reward = max(episode_rewards_list[-aggregate_stats:])
+        self.agent.tensorboard.update_stats(reward_avg=average_reward,
+                                            reward_min=min_reward,
+                                            reward_max=max_reward,
+                                            epsilon=self.epsilon,
+                                            win_rate=win_rate,
+                                            time=time)
 
 # def player(obs, info):
 #     """

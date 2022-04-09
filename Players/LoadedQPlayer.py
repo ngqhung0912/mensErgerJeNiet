@@ -1,12 +1,5 @@
-from model.ModifiedTensorBoard import ModifiedTensorBoard as mtb
 import numpy as np
-from keras.models import Sequential
-from keras.layers import Dense
-from tensorflow.keras.optimizers import Adam
 import tensorflow as tf
-from collections import deque
-import time
-import random
 from Players.Player import Player
 
 
@@ -14,7 +7,7 @@ class LoadedQPlayer(Player):
     def __init__(self):
         super().__init__()
         self.loaded_model = tf.keras.models.\
-            load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__train_1500__21-100-100-50-50-4.model__0.26')
+            load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__model_1500__21-100-100-50-50-4__.model')
         self.relative_position = None
 
 

@@ -1,11 +1,9 @@
 from ludo.ludo import make
 import numpy as np
-import matplotlib.pyplot as plt
 import time
 from Players.RandomPlayer import RandomPlayer
 from Players.QPlayer import QPlayer
-from Players.LoadedQPlayer import LoadedQPlayer
-
+from EnvFunctions import EnvFunctions
 
 final_reward_list = []
 AGGREGATE_STATS_EVERY = 50
@@ -15,23 +13,20 @@ model_name = 'ludo'
 progress = []
 num_wins = 0
 # reset the game
-num_episodes = 10000
+num_episodes = 500
 PLAYER2COLOR = ['Yellow', 'Red', 'Blue', 'Green']
 player1 = RandomPlayer()
+fun = EnvFunctions()
+
 training_player = QPlayer(model_name, epsilon=1, episodes=num_episodes)
 player3 = RandomPlayer()
 player4 = RandomPlayer()
 # create a list of players
 players = [player1, training_player, player3, player4]
 
+
 start_time = time.time()
 for episode in range(1, num_episodes + 1):
-    if episode % 100 == 0:
-        end_10_eps_time = time.time()
-        print("time per 100 games:", end_10_eps_time - start_time)
-        print('win per 100 games:', num_wins)
-
-        start_time = end_10_eps_time
 
     training_player.agent.tensorboard.step = episode
     episode_reward = 0
@@ -79,26 +74,16 @@ for episode in range(1, num_episodes + 1):
     training_player.agent.train(done)
 
     if not episode % AGGREGATE_STATS_EVERY or episode == 1:
-        average_reward = sum(episode_rewards_list[-AGGREGATE_STATS_EVERY:]) / len(
-            episode_rewards_list[-AGGREGATE_STATS_EVERY:])
-        min_reward = min(episode_rewards_list[-AGGREGATE_STATS_EVERY:])
-        max_reward = max(episode_rewards_list[-AGGREGATE_STATS_EVERY:])
-        training_player.agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward,
-                                                       reward_max=max_reward, epsilon=training_player.epsilon)
-        # Save model, but only when min reward is greater or equal a set value
+        win_rate = num_wins / episode
+        end_time = time.time()
+        print('time per {} games: {}'.format(episode, end_time - start_time))
+        print('win rate per {} games: {}'.format(episode, win_rate))
+        training_player.update_tensorboard_stats(episode_rewards_list, win_rate, AGGREGATE_STATS_EVERY,
+                                                 time= end_time - start_time)
+
     training_player.handle_endgame()
-    progress.append(num_wins/episode)
-plt.figure(1)
-plt.plot(episode_rewards_list)
-plt.savefig('rewards.png')
-
-print(num_wins)
+    progress.append(num_wins / episode)
 
 
-plt.figure(2)
-plt.plot(progress)
-plt.savefig('training_progress.png')
-
-training_player.agent.save_model(progress[-1])
-
-
+fun.plot_array(progress, "training progress", x_label="number of games", y_label="win rate",
+               additional_infos=training_player.info_array)
