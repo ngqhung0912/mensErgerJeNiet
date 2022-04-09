@@ -4,6 +4,8 @@ import time
 from Players.RandomPlayer import RandomPlayer
 from Players.QPlayer import QPlayer
 from EnvFunctions import EnvFunctions
+from Players.StrategyPlayer import StrategyPlayer
+
 
 final_reward_list = []
 AGGREGATE_STATS_EVERY = 50
@@ -13,16 +15,16 @@ model_name = 'ludo'
 progress = []
 num_wins = 0
 # reset the game
-num_episodes = 500
+num_episodes = 10
 PLAYER2COLOR = ['Yellow', 'Red', 'Blue', 'Green']
 player1 = RandomPlayer()
 fun = EnvFunctions()
 
 training_player = QPlayer(model_name, epsilon=1, episodes=num_episodes)
-player3 = RandomPlayer()
+strategy_player = StrategyPlayer()
 player4 = RandomPlayer()
 # create a list of players
-players = [player1, training_player, player3, player4]
+players = [player1, training_player, strategy_player, player4]
 
 
 start_time = time.time()
@@ -45,8 +47,6 @@ for episode in range(1, num_episodes + 1):
         # pass the action and get the new game state
         obs, reward, done, info = env.step(action)
         # handle the reward
-        # if info['eyes'] == 6:
-        #     print()
 
         if isinstance(current_player, QPlayer):
             episode_reward += current_player.handle_reward(obs, info['player'])
@@ -57,7 +57,7 @@ for episode in range(1, num_episodes + 1):
         training_player.save_previous_obs(obs)
 
         # render for graphical representation of game state
-        # env.render()
+        env.render()
     # compute the winner / ranking
     scores = [sum([pos > 40 for pos in state]) for state in obs]  # no of pawns in target field for each player
     winner = np.argsort(scores)[-1]
@@ -79,7 +79,7 @@ for episode in range(1, num_episodes + 1):
         print('time per {} games: {}'.format(episode, end_time - start_time))
         print('win rate per {} games: {}'.format(episode, win_rate))
         training_player.update_tensorboard_stats(episode_rewards_list, win_rate, AGGREGATE_STATS_EVERY,
-                                                 time= end_time - start_time)
+                                                 time=(end_time - start_time))
 
     training_player.handle_endgame()
     progress.append(num_wins / episode)

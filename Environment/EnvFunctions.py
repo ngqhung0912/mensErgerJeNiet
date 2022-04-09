@@ -11,9 +11,10 @@ class EnvFunctions:
         plt.xlabel(x_label)
         plt.ylabel(y_label)
         fig_name = name
-        for info in additional_infos:
-            fig_name += info
-            fig_name += "__"
+        if additional_infos is not None:
+            for info in additional_infos:
+                fig_name += info
+                fig_name += "__"
         plt.plot(array)
         plt.savefig('Figures/{}-{}.png'.format(fig_name, self.figure_count))
         self.figure_count += 1

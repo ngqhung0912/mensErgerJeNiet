@@ -8,8 +8,6 @@ global Q_player
 class QPlayer(Player):
     def __init__(self, model_name: str, epsilon: float, episodes: int):
         super(QPlayer, self).__init__()
-        self.previous_obs = None
-        self.relative_position = None
         self.agent = Agent(model_name, discount_rate=0.7, learning_rate=0.01, episodes=episodes)
         self.epsilon = epsilon
         self.min_epsilon = 0.001
@@ -31,9 +29,6 @@ class QPlayer(Player):
         else:
             move = np.random.random_sample(size=4)
         return move
-
-    def save_previous_obs(self, obs: list):
-        self.previous_obs = obs
 
     def update_memory(self, action, reward, done):
 
