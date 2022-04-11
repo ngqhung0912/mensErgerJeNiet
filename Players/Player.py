@@ -14,7 +14,7 @@ class Player:
     def load_model(self):
         pass
 
-    def handle_reward(self, obs: list, current_player: int):
+    def handle_reward(self, obs: list):
         pass
 
     def calculate_relative_position(self, obs: list):
@@ -63,9 +63,17 @@ class Player:
     def handle_move(self, obs: list, info: dict):
         pass
 
-    def handle_nn_input(self, pos: list,  ):
+    def handle_nn_input(self, pos: list):
+
+        for i in range(len(pos)):
+            for j in range(len(pos[i])):
+                if i == 0:
+                    pos[i][j] = pos[i][j] / 44
+                else:
+                    pos[i][j] = pos[i][j] / 12
         pos = np.array(pos).reshape((20, 1))
-        nn_input = np.append(pos, self.dice).reshape((21, 1))
+
+        nn_input = np.append(pos, self.dice/6).reshape((21, 1))
         return nn_input
 
     def save_previous_obs(self, obs: list):

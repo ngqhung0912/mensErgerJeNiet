@@ -6,18 +6,14 @@ from tensorflow.keras.optimizers import Adam
 from collections import deque
 import time
 import random
-
+import tensorflow as tf
 
 class Agent:
     def __init__(self, model_name: str, discount_rate: float, learning_rate: float, episodes: int):
 
-        # Main model
-        self.model = self.create_model()
-        # self.model = tf.keras.models.\
-        #     load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__model_1500__21-100-100-50-50-4__0.3.model')
         self.replay_memory_size = 100000
-        self.min_replay_memory_size = 1000
-        self.minibatch_size = 128
+        self.min_replay_memory_size = 100
+        self.minibatch_size = 64
         self.update_target_range = 5
         self.update_logs = 1000
         self.model_name = model_name
@@ -26,6 +22,12 @@ class Agent:
         self.output_shape = 4
         self.learning_rate = learning_rate
         self.log_num = 0
+
+        # Main model
+        # self.model = tf.keras.models.\
+        #     load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__model_1500__21-100-100-50-50-4__0.3.model')
+        self.model = self.create_model()
+
         # Target network
         self.target_model = self.create_model()
         # self.target_model = tf.keras.models.\
@@ -44,13 +46,21 @@ class Agent:
 
     def create_model(self):
         model = Sequential()
+
         model.add(Dense(100, input_dim=21, kernel_initializer='normal',
                         activation="relu"))
+
         model.add(Dense(50, input_dim=100,
                         kernel_initializer="normal", activation="relu"))
+
+        model.add(Dense(100, input_dim=100,
+                        kernel_initializer="normal", activation="relu"))
+
         model.add(Dense(4, input_dim=100,
                         kernel_initializer="normal", activation="softmax"))
-        model.compile(loss="categorical_crossentropy", optimizer=Adam(learning_rate=0.001), metrics=['categorical_crossentropy'])
+        model.compile(loss="mse",
+                      optimizer=Adam(learning_rate=self.learning_rate),
+                      metrics=['mae'])
         return model
 
     # Adds step's data to a memory replay array
@@ -60,8 +70,6 @@ class Agent:
 
     # Trains main network every step during episode
     def train(self, terminal_state):
-        current_qs_list = []
-        future_qs_list = []
         # Start training only if certain number of samples is already saved
         if len(self.replay_memory) < self.min_replay_memory_size:
             return
@@ -126,8 +134,8 @@ class Agent:
 
     def save_model(self, progress):
         self.model.save(
-            f'models/ludo__model_1500__21-100-100-50-50-4__.model')
+            'models/ludo__model_1500__21-100-100-50-50-4__{}.model'.format(progress))
 
         self.target_model.save(
-            f'models/ludo__target_model_1500__21-100-100-50-50-4__.model')
+            'models/ludo__target_model_1500__21-100-100-50-50-4__{}__.model'.format(progress))
 
