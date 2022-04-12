@@ -47,13 +47,16 @@ class Agent:
     def create_model(self):
         model = Sequential()
 
-        model.add(Dense(50, input_dim=21, kernel_initializer='normal',
+        model.add(Dense(100, input_dim=21, kernel_initializer='normal',
                         activation="relu"))
 
-        model.add(Dense(25, input_dim=50,
+        model.add(Dense(50, input_dim=100,
                         kernel_initializer="normal", activation="relu"))
 
-        model.add(Dense(4, input_dim=25,
+        model.add(Dense(100, input_dim=100,
+                        kernel_initializer="normal", activation="relu"))
+
+        model.add(Dense(4, input_dim=100,
                         kernel_initializer="normal", activation="softmax"))
         model.compile(loss="mse",
                       optimizer=Adam(learning_rate=self.learning_rate),
@@ -74,7 +77,7 @@ class Agent:
         # Get a minibatch of random samples from memory replay table
         minibatch = random.sample(self.replay_memory, self.minibatch_size)
         # Get current states from minibatch, then query NN model for Q values
-        current_states = np.array([transition[0] for transition in minibatch]).reshape(self.minibatch_size, 21)  # normalize
+        current_states = np.array([transition[0] for transition in minibatch]).reshape(self.minibach_size, 21)  # normalize
         current_qs_list = self.model.predict(current_states, batch_size=self.minibatch_size)
         # Get future states from minibatch, then query NN model for Q values
         # When using target network, query it, otherwise main network should be queried

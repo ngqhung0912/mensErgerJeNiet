@@ -14,7 +14,7 @@ model_name = 'ludo'
 progress = []
 num_wins = 0
 # reset the game
-num_episodes = 1000
+num_episodes = 300
 PLAYER2COLOR = ['Yellow', 'Red', 'Blue', 'Green']
 player1 = RandomPlayer()
 fun = EnvFunctions()
@@ -54,7 +54,7 @@ for episode in range(1, num_episodes + 1):
         if training_player.index is not None \
                 and obs[training_player.index] != training_player.previous_pos \
                 and info['player'] != training_player.index \
-                and info['player'] != training_player.index +1:
+                and info['player'] != training_player.index + 1:
             training_player.inform_kicked()
 
         # handle the reward

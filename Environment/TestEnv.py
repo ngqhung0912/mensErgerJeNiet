@@ -38,6 +38,7 @@ for episode in range(1, num_episodes + 1):
     while not done:
         # get an action from the current player
         current_player = players[info['player']]
+        print(current_player)
         action = current_player.handle_move(obs, info)
         # pass the action and get the new game state
         obs, reward, done, info = env.step(action)
