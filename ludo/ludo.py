@@ -270,8 +270,8 @@ class Player:
         return [pawn.position for pawn in self.pawns]
 
     def step(self, action, eyes):
-        for id in np.argsort(action)[::-1]:  # sort action in reverse way: pawn with highest value has priority
-            new_abs_pos = self.pawns[id].step(eyes, self.obs())
+        for i in np.argsort(action)[::-1]:  # sort action in reverse way: pawn with highest value has priority
+            new_abs_pos = self.pawns[i].step(eyes, self.obs())
             if new_abs_pos != -1:
                 break
         # return     

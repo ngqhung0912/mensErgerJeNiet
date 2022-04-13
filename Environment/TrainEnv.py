@@ -14,7 +14,7 @@ model_name = 'ludo'
 progress = []
 num_wins = 0
 # reset the game
-num_episodes = 300
+num_episodes = 1000
 PLAYER2COLOR = ['Yellow', 'Red', 'Blue', 'Green']
 player1 = RandomPlayer()
 fun = EnvFunctions()
@@ -79,6 +79,8 @@ for episode in range(1, num_episodes + 1):
     episode_reward += final_reward
     episode_rewards_list.append(episode_reward)
     training_player.update_memory(action, episode_reward, done)
+    if episode % 200 == 0:
+        print()
     training_player.agent.train(done)
 
     if episode % AGGREGATE_STATS_EVERY == 0 and episode != 1:
