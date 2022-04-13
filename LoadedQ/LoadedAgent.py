@@ -4,9 +4,9 @@ from keras.models import Sequential
 from keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
 from collections import deque
+import time
 import random
 import tensorflow as tf
-
 
 class Agent:
     def __init__(self, model_name: str, discount_rate: float, learning_rate: float, episodes: int):
@@ -24,14 +24,14 @@ class Agent:
         self.log_num = 0
 
         # Main model
-        self.model = tf.keras.models. \
-            load_model('models/ludo__model_1500__21-100-100-50-50-4__0.24333333333333335.model')
-        # self.model = self.create_model()
+        # self.model = tf.keras.models.\
+        #     load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__model_1500__21-100-100-50-50-4__0.3.model')
+        self.model = self.create_model()
 
         # Target network
-        # self.target_model = self.create_model()
-        self.target_model = tf.keras.models. \
-            load_model('models/ludo__target_model_1500__21-100-100-50-50-4__0.24333333333333335__.model')
+        self.target_model = self.create_model()
+        # self.target_model = tf.keras.models.\
+        #     load_model('/Users/hungnguyen/mensErgerJeNiet/models/ludo__target_model_1500__21-100-100-50-50-4__0.3.model')
 
         self.target_model.set_weights(self.model.get_weights())
 
@@ -39,26 +39,28 @@ class Agent:
         self.replay_memory = deque(maxlen=self.replay_memory_size)
 
         # Custom tensorboard object
-        # Custom tensorboard object
-        self.tensorboard = mtb(
-            log_dir="logs/lr={}-dr={}-num_eps={}-nn:21-42-25-4".format(learning_rate, discount_rate, episodes))
+        self.tensorboard = mtb(log_dir="logs/lr={}-dr={}-num_eps={}".format(learning_rate, discount_rate, episodes))
 
-        # Used to count when to update target network x with main network's weights
+        # Used to count when to update target network xwith main network's weights
         self.target_update_counter = 0
 
     def create_model(self):
         model = Sequential()
 
-        model.add(Dense(42, input_dim=21, kernel_initializer='normal',
+        model.add(Dense(100, input_dim=21, kernel_initializer='normal',
                         activation="relu"))
 
-        model.add(Dense(25, input_dim=42,
+        model.add(Dense(50, input_dim=100,
                         kernel_initializer="normal", activation="relu"))
 
-        model.add(Dense(4, input_dim=25,
-                        kernel_initializer="normal", activation="softmax"))
+        model.add(Dense(100, input_dim=100,
+                        kernel_initializer="normal", activation="relu"))
 
-        model.compile(loss="mse", optimizer=Adam(learning_rate=self.learning_rate))
+        model.add(Dense(4, input_dim=100,
+                        kernel_initializer="normal", activation="softmax"))
+        model.compile(loss="mse",
+                      optimizer=Adam(learning_rate=self.learning_rate),
+                      metrics=['mae'])
         return model
 
     # Adds step's data to a memory replay array
@@ -75,13 +77,11 @@ class Agent:
         # Get a minibatch of random samples from memory replay table
         minibatch = random.sample(self.replay_memory, self.minibatch_size)
         # Get current states from minibatch, then query NN model for Q values
-        current_states = np.array([transition[0] for transition in minibatch]).reshape(self.minibatch_size,
-                                                                                       21)  # normalize
+        current_states = np.array([transition[0] for transition in minibatch]).reshape(self.minibach_size, 21)  # normalize
         current_qs_list = self.model.predict(current_states, batch_size=self.minibatch_size)
         # Get future states from minibatch, then query NN model for Q values
         # When using target network, query it, otherwise main network should be queried
-        new_current_states = np.array([transition[3] for transition in minibatch]).reshape(self.minibatch_size,
-                                                                                           21)  # normalize
+        new_current_states = np.array([transition[3] for transition in minibatch]).reshape(self.minibatch_size, 21)   # normalize
         future_qs_list = self.target_model.predict(new_current_states)
         input_batch = []
         output_batch = []
@@ -114,6 +114,7 @@ class Agent:
                        shuffle=False,
                        callbacks=[self.tensorboard] if self.log_num == self.update_logs else None)
 
+
         # Update target network counter every episode
         if terminal_state:
             self.target_update_counter += 1
@@ -138,3 +139,4 @@ class Agent:
 
         self.target_model.save(
             'models/ludo__target_model_1500__21-100-100-50-50-4__{}__.model'.format(progress))
+

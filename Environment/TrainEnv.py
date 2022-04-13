@@ -54,7 +54,7 @@ for episode in range(1, num_episodes + 1):
         if training_player.index is not None \
                 and obs[training_player.index] != training_player.previous_pos \
                 and info['player'] != training_player.index \
-                and info['player'] != training_player.index +1:
+                and info['player'] != training_player.index + 1:
             training_player.inform_kicked()
 
         # handle the reward
@@ -79,6 +79,8 @@ for episode in range(1, num_episodes + 1):
     episode_reward += final_reward
     episode_rewards_list.append(episode_reward)
     training_player.update_memory(action, episode_reward, done)
+    if episode % 200 == 0:
+        print()
     training_player.agent.train(done)
 
     if episode % AGGREGATE_STATS_EVERY == 0 and episode != 1:

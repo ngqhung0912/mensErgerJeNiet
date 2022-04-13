@@ -4,22 +4,22 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 # import players
-from Players.PlayerExample import player as player1
+from ludo.ludo import random_player as player1
 from ludo.ludo import random_player as rd1
 from ludo.ludo import random_player
-
+from LoadedQ.LoadedPlayer import player as player2
 # constants
 PLAYER2COLOR = ['Yellow', 'Red', 'Blue', 'Green']
 
 # create a list of players
-players = [player1, rd1, random_player, random_player ]
+players = [player1, player2, random_player, random_player]
 
 # create an instance of the game with 4 players
 
 # reset the game
 reward_list = []
 # play the game until finished
-for _ in range(1000):
+for _ in range(1):
     reward = 0
 
     env = make(num_players=4)
@@ -56,5 +56,3 @@ for _ in range(1000):
     reward_list.append(reward)
 
 
-plt.plot(reward_list)
-plt.savefig('test_random')

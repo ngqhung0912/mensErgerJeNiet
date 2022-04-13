@@ -8,10 +8,10 @@ global Q_player
 class QPlayer(Player):
     def __init__(self, model_name: str, epsilon: float, episodes: int):
         super(QPlayer, self).__init__()
-        self.agent = Agent(model_name, discount_rate=0.9, learning_rate=0.1, episodes=episodes)
+        self.agent = Agent(model_name, discount_rate=0.95, learning_rate=0.2, episodes=episodes)
         self.epsilon = epsilon
-        self.min_epsilon = 0.001
-        self.epsilon_decay = (self.epsilon - self.min_epsilon) / episodes
+        self.min_epsilon = 0.01
+        self.epsilon_decay = (self.epsilon - self.min_epsilon) / 30000
         self.killed = 0
         self.being_killed = 0
         self.previous_pos = [0, 0, 0, 0]
@@ -19,7 +19,8 @@ class QPlayer(Player):
         self.info_array = ['epsilon = {}'.format(self.epsilon),
                            'learning rate = {}'.format(self.agent.learning_rate),
                            'discount rate = {}'.format(self.agent.discount_rate),
-                           'neural network = 21 - 100, 100 - 50, 50 - 4']
+                           'loss function: false',
+                           'neural network = 21 - 42 - 25 - 4']
 
     def handle_move(self, obs: list, info: dict) -> np.ndarray:
         self.index = info['player']
@@ -87,7 +88,7 @@ class QPlayer(Player):
             else:
                 for j in range(len(obs[i])):
                     if self.previous_obs[i][j] > 0 and obs[i][j] == 0:
-                        reward += 0.3  # knocked a piece
+                        reward += 1  # knocked a piece
                         self.killed += 1
         return reward
 
@@ -119,27 +120,3 @@ class QPlayer(Player):
 
     def inform_kicked(self):
         self.kicked = True
-
-# def player(obs, info):
-#     """
-#     defines a random player: returns a random action as a (4,) numpy array
-# regardless the game state
-#     """
-#     # here goes your code
-#     # do not load your model here but use the main() function icm with a global variable
-#     return Q_player.handle_move(obs, info)
-
-
-# any other code that should run during import define in function main()
-# def main():
-#     # do all required initialisation here
-#     # use relative paths for access to stored files that you require
-#     # use global variables to make sure the player() function has access
-#     global Q_player
-#     model
-#     Q_player = QPlayer(training_player = QPlayer(model_name, epsilon=1)
-# )
-#     pass
-#
-#
-# main()
