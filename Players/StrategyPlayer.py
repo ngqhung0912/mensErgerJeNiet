@@ -22,8 +22,6 @@ class StrategyPlayer(Player):
         closest_pawn_front = np.argmax(enemy_location)
         closest_pawn_behind = np.argmin(enemy_location)
 
-
-
         min_pawn = np.argmin(current_pawn_position)
         max_pawn = np.argmax(current_pawn_position)
 

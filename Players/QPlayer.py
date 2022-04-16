@@ -8,10 +8,10 @@ global Q_player
 class QPlayer(Player):
     def __init__(self, model_name: str, epsilon: float, episodes: int):
         super(QPlayer, self).__init__()
-        self.agent = Agent(model_name, discount_rate=0.95, learning_rate=0.2, episodes=episodes)
+        self.agent = Agent(model_name, discount_rate=0.95, learning_rate=0.01, episodes=episodes)
         self.epsilon = epsilon
         self.min_epsilon = 0.01
-        self.epsilon_decay = (self.epsilon - self.min_epsilon) / 30000
+        self.epsilon_decay = (self.epsilon - self.min_epsilon) / 10000
         self.killed = 0
         self.being_killed = 0
         self.previous_pos = [0, 0, 0, 0]
@@ -21,6 +21,7 @@ class QPlayer(Player):
                            'discount rate = {}'.format(self.agent.discount_rate),
                            'loss function: false',
                            'neural network = 21 - 42 - 25 - 4']
+        self.previous_action = None
 
     def handle_move(self, obs: list, info: dict) -> np.ndarray:
         self.index = info['player']
@@ -57,7 +58,7 @@ class QPlayer(Player):
         current_obs = obs[self.index]
         try:
             if max(filter(lambda x: x < 40, current_obs)) > max(filter(lambda x: x < 40, self.previous_pos)):
-                # reward to moving closer to homebase
+                # reward to moving closer to homebase                # reward to moving closer to homebase
                 reward += 0.1
         except ValueError:
             pass
@@ -120,3 +121,9 @@ class QPlayer(Player):
 
     def inform_kicked(self):
         self.kicked = True
+
+    def save_action(self, action: list):
+        self.previous_action = action
+
+    def get_action(self):
+        return self.previous_action

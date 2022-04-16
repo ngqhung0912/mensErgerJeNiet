@@ -11,9 +11,9 @@ import tensorflow as tf
 class Agent:
     def __init__(self, model_name: str, discount_rate: float, learning_rate: float, episodes: int):
 
-        self.replay_memory_size = 100000
+        self.replay_memory_size = 50000
         self.min_replay_memory_size = 100
-        self.minibatch_size = 64
+        self.minibatch_size = 32
         self.update_target_range = 5
         self.update_logs = 1000
         self.model_name = model_name
@@ -24,14 +24,14 @@ class Agent:
         self.log_num = 0
 
         # Main model
-        self.model = tf.keras.models. \
-            load_model('models/ludo__model_1500__21-100-100-50-50-4__0.24333333333333335.model')
-        # self.model = self.create_model()
+        # self.model = tf.keras.models. \
+        #     load_model('models/ludo__model_1500__21-100-100-50-50-4__0.24333333333333335.model')
+        self.model = self.create_model()
 
         # Target network
-        # self.target_model = self.create_model()
-        self.target_model = tf.keras.models. \
-            load_model('models/ludo__target_model_1500__21-100-100-50-50-4__0.24333333333333335__.model')
+        self.target_model = self.create_model()
+        # self.target_model = tf.keras.models. \
+        #     load_model('models/ludo__target_model_1500__21-100-100-50-50-4__0.24333333333333335__.model')
 
         self.target_model.set_weights(self.model.get_weights())
 
@@ -49,16 +49,25 @@ class Agent:
     def create_model(self):
         model = Sequential()
 
-        model.add(Dense(42, input_dim=21, kernel_initializer='normal',
+        model.add(Dense(10, input_dim=21, kernel_initializer='he_uniform',
                         activation="relu"))
 
-        model.add(Dense(25, input_dim=42,
+        model.add(Dense(10, input_dim=10,
                         kernel_initializer="normal", activation="relu"))
 
-        model.add(Dense(4, input_dim=25,
+        model.add(Dense(10, input_dim=10,
+                        kernel_initializer="normal", activation="relu"))
+
+        model.add(Dense(10, input_dim=10,
+                        kernel_initializer="normal", activation="relu"))
+
+        model.add(Dense(4, input_dim=10,
                         kernel_initializer="normal", activation="softmax"))
 
-        model.compile(loss="mse", optimizer=Adam(learning_rate=self.learning_rate))
+        model.compile(loss="categorical_crossentropy",
+                      optimizer=Adam(learning_rate=self.learning_rate),
+                      metrics='accuracy')
+
         return model
 
     # Adds step's data to a memory replay array
@@ -98,13 +107,12 @@ class Agent:
                 new_q = reward
 
             # Update Q value for given state
-            # current_qs = current_qs_list[index]
-            # current_qs[action] = new_q
-            current_qs_list[index] = new_q
+            current_qs = current_qs_list[index]
+            current_qs[np.argmax(action)] = new_q
 
             # And append to our training data
             input_batch.append(current_state)
-            output_batch.append(current_qs_list[index])
+            output_batch.append(current_qs)
 
         # Fit on all samples as one batch, log only on terminal state
         self.model.fit(np.array(input_batch).reshape(self.minibatch_size, 21),
@@ -130,11 +138,12 @@ class Agent:
     # Queries main network for Q values given current observation space (environment state)
     def get_qs(self, state: list):
         state = np.array(state).reshape((1, 21))
-        return self.model.predict(state)
+        action = self.model.predict(state)
+        return action
 
     def save_model(self, progress):
         self.model.save(
-            'models/ludo__model_1500__21-100-100-50-50-4__{}.model'.format(progress))
+            'models/ludo__model__{}.model'.format(progress))
 
         self.target_model.save(
-            'models/ludo__target_model_1500__21-100-100-50-50-4__{}__.model'.format(progress))
+            'models/ludo__target_model__{}__.model'.format(progress))

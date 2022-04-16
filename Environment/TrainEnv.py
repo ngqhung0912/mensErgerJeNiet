@@ -8,19 +8,19 @@ from Players.StrategyPlayer import StrategyPlayer
 
 final_reward_list = []
 AGGREGATE_STATS_EVERY = 50
-MIN_REWARD = -5
+MIN_REWARD = -2
 episode_rewards_list = []
 model_name = 'ludo'
 progress = []
 num_wins = 0
 # reset the game
-num_episodes = 1000
+num_episodes = 15000
 PLAYER2COLOR = ['Yellow', 'Red', 'Blue', 'Green']
 player1 = RandomPlayer()
 fun = EnvFunctions()
 
 training_player = QPlayer(model_name, epsilon=1, episodes=num_episodes)
-strategy_player = StrategyPlayer()
+strategy_player = RandomPlayer()
 player4 = RandomPlayer()
 # create a list of players
 players = [player1, training_player, strategy_player, player4]
@@ -64,6 +64,8 @@ for episode in range(1, num_episodes + 1):
             if not done:
                 training_player.update_memory(action, move_reward, done)
                 training_player.agent.train(done)
+            training_player.save_action(action)
+
         # render for graphical representation of game state
     # compute the winner / ranking
     scores = [sum([pos > 40 for pos in state]) for state in obs]  # no of pawns in target field for each player
@@ -78,9 +80,7 @@ for episode in range(1, num_episodes + 1):
 
     episode_reward += final_reward
     episode_rewards_list.append(episode_reward)
-    training_player.update_memory(action, episode_reward, done)
-    if episode % 200 == 0:
-        print()
+    training_player.update_memory(training_player.get_action(), episode_reward, done)
     training_player.agent.train(done)
 
     if episode % AGGREGATE_STATS_EVERY == 0 and episode != 1:
