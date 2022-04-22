@@ -1,53 +1,36 @@
-import numpy as np
-import tensorflow as tf
 from Players.Player import Player
+import numpy as np
+from model.Agent import Agent
+from model.ModifiedTensorBoard import ModifiedTensorBoard as mtb
 
-global action
 
-#
-# class LoadedQPlayer(Player):
-#     def __init__(self):
-#         super().__init__()
-#         self.loaded_model = tf.keras.models.\
-#             load_model('models/ludo__model_1500__21-100-100-50-50-4__0.262.model')
-#         self.relative_position = None
-#
-#     def handle_move(self, obs: list, info: dict):
-#         self.index = info['player']
-#         self.dice = info['eyes']
-#         self.relative_position = Player.calculate_relative_position(self, obs)
-#         nn_input = self.handle_nn_input(self.relative_position)
-#         nn_output = self.loaded_model.predict(np.array(nn_input).reshape(1, 21)).reshape((4,))
-#         nn_output = np.ndarray.tolist(nn_output)
-#
-#         return nn_output
-#
-# def player(obs, info):
-#     """
-#     defines a random player: returns a random action as a (4,) numpy array
-# regardless the game state
-#     """
-#     # here goes your code
-#     # do not load your model here but use the main() function icm with a global variable
-#     # action  = np.random.random_sample(size = 4)
-#     return action
-#
-#
-# # any other code that should run during import define in function main()
-# def main():
-#     # do all required initialisation here
-#     # use relative paths for access to stored files that you require
-#     # use global variables to make sure the player() function has access
-#     player_example = LoadedQPlayer()
-#     global action
-#     action = player_example.load_model()
-#     pass
-#
-#
-# main()
-#
-#
-#
-#
+class LoadedQPlayer(Player):
+    def __init__(self, model_name: str, episodes: int):
+        super(LoadedQPlayer, self).__init__()
+        self.agent = Agent(model_name, discount_rate=0.95, learning_rate=0.01, episodes=episodes, training=False,
+                           tensorboard=mtb(log_dir="logs/testrun3".
+                                           format(0.01, 0.95, episodes)),
+                           model_dir='models/ludo1.model')
+        self.killed = 0
+        self.being_killed = 0
+        self.previous_pos = [0, 0, 0, 0]
+        self.kicked = False
+        self.info_array = ['learning on-the-fly',
+                           'learning rate = {}'.format(self.agent.learning_rate),
+                           'discount rate = {}'.format(self.agent.discount_rate),
+                           'loss function: cross-entropy',
+                           'neural network = 21 - 42 - 25 - 4']
+        self.previous_action = None
+
+    def handle_move(self, obs: list, info: dict) -> np.ndarray:
+        self.index = info['player']
+        self.dice = info['eyes']
+        self.relative_position = Player.calculate_relative_position(self, obs)
+        nn_input = self.handle_nn_input(self.relative_position)
+        move = self.agent.get_qs(nn_input).reshape((4,))
+        return move
+
+    def handle_endgame(self):
+        self.previous_obs = None
 
 
