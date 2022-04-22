@@ -15,7 +15,7 @@ class LoadedQPlayer(Player):
         self.agent = Agent(model_name, discount_rate=0.95, learning_rate=0.01, episodes=episodes, training=False,
                            tensorboard=mtb(log_dir="logs/testrun3".
                                            format(0.01, 0.95, episodes)),
-                           model_dir='models/ludo1.model')
+                           model_dir='models/ludotrain_run.model')
         self.killed = 0
         self.being_killed = 0
         self.previous_pos = [0, 0, 0, 0]
