@@ -3,6 +3,11 @@ import numpy as np
 from model.Agent import Agent
 from model.ModifiedTensorBoard import ModifiedTensorBoard as mtb
 
+"""
+This class implements the base player class, and, contrary to the QPlayer.py - does not implements epsilon-greedy 
+algorithm.
+"""
+
 
 class LoadedQPlayer(Player):
     def __init__(self, model_name: str, episodes: int):
@@ -15,12 +20,12 @@ class LoadedQPlayer(Player):
         self.being_killed = 0
         self.previous_pos = [0, 0, 0, 0]
         self.kicked = False
-        self.info_array = ['learning on-the-fly',
+        self.previous_action = None
+        self.info_array = [
                            'learning rate = {}'.format(self.agent.learning_rate),
                            'discount rate = {}'.format(self.agent.discount_rate),
-                           'loss function: cross-entropy',
-                           'neural network = 21 - 42 - 25 - 4']
-        self.previous_action = None
+                           'loss function: MAE',
+                           'neural network = 21 - 16x4 - 4']
 
     def handle_move(self, obs: list, info: dict) -> np.ndarray:
         self.index = info['player']

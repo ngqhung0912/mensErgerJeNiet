@@ -5,6 +5,8 @@ from Players.RandomPlayer import RandomPlayer
 from Players.LoadedQPlayer import LoadedQPlayer
 from EnvFunctions import EnvFunctions
 
+
+
 final_reward_list = []
 AGGREGATE_STATS_EVERY = 50
 MIN_REWARD = -2
@@ -42,7 +44,6 @@ for episode in range(1, num_episodes + 1):
         # env.render()
 
         current_player = players[info['player']]
-        # if isinstance(current_player, QPlayer):
         if learned_player.index is not None:
             learned_player.save_previous_pos(obs[learned_player.index])
 
