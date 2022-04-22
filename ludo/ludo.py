@@ -165,7 +165,7 @@ class Game:
 
     def step(self, action):
         # compute new position of a pawn
-        new_abs_pos = self.players[self.current_player].step(action, self.eyes)
+        new_abs_pos, moved_pawn = self.players[self.current_player].step(action, self.eyes)
 
         # if a pawn has moved to a new position on the board check if another pawn is "geslagen"
         if 1 <= new_abs_pos <= 40:
@@ -182,7 +182,8 @@ class Game:
 
         # return the new state for the next player
         self.roll_dice()
-        return self.get_game_state()
+        obs, reward, done, info = self.get_game_state()
+        return obs, reward, done, info, moved_pawn
 
     def render(self):
         if self.render_valid:
@@ -270,12 +271,14 @@ class Player:
         return [pawn.position for pawn in self.pawns]
 
     def step(self, action, eyes):
-        for i in np.argsort(action)[::-1]:  # sort action in reverse way: pawn with highest value has priority
+        moved_pawn_index = -1
+        for i in np.argsort(action)[::-1]:  # sort action in reverse way: pawn with the highest value has priority
             new_abs_pos = self.pawns[i].step(eyes, self.obs())
             if new_abs_pos != -1:
+                moved_pawn_index = i
                 break
-        # return     
-        return new_abs_pos
+        # return
+        return new_abs_pos, moved_pawn_index
 
     def sla(self, abs_position):
         for pawn in self.pawns:
@@ -313,7 +316,7 @@ def main():
     env.render()
     while not done:
         action = myplayers[info['player']](obs, info)
-        obs, reward, done, info = env.step(action)
+        obs, reward, done, info, _ = env.step(action)
         print(obs, done, info)
         env.render()
         time.sleep(1)

@@ -8,19 +8,19 @@ from Players.StrategyPlayer import StrategyPlayer
 
 final_reward_list = []
 AGGREGATE_STATS_EVERY = 50
-MIN_REWARD = -5
+MIN_REWARD = -2
 episode_rewards_list = []
 model_name = 'ludo'
 progress = []
 num_wins = 0
 # reset the game
-num_episodes = 1000
+num_episodes = 10000
 PLAYER2COLOR = ['Yellow', 'Red', 'Blue', 'Green']
 player1 = RandomPlayer()
 fun = EnvFunctions()
 
-training_player = QPlayer(model_name, epsilon=1, episodes=num_episodes)
-strategy_player = StrategyPlayer()
+training_player = QPlayer(model_name, epsilon=0.5, episodes=num_episodes)
+strategy_player = RandomPlayer()
 player4 = RandomPlayer()
 # create a list of players
 players = [player1, training_player, strategy_player, player4]
@@ -50,7 +50,7 @@ for episode in range(1, num_episodes + 1):
         action = current_player.handle_move(obs, info)
         # pass the action and get the new game state
         training_player.save_previous_obs(obs)
-        obs, reward, done, info = env.step(action)
+        obs, reward, done, info, moved_pawn_index = env.step(action)
         if training_player.index is not None \
                 and obs[training_player.index] != training_player.previous_pos \
                 and info['player'] != training_player.index \
@@ -61,9 +61,12 @@ for episode in range(1, num_episodes + 1):
         if isinstance(current_player, QPlayer):
             move_reward = current_player.handle_reward(obs)
             episode_reward += move_reward
-            if not done:
-                training_player.update_memory(action, move_reward, done)
+            if not done and moved_pawn_index != -1:
                 training_player.agent.train(done)
+                training_player.update_memory(move_reward, moved_pawn_index, done)
+                training_player.update_model_info()
+            training_player.save_action(action, moved_pawn_index)
+
         # render for graphical representation of game state
     # compute the winner / ranking
     scores = [sum([pos > 40 for pos in state]) for state in obs]  # no of pawns in target field for each player
@@ -71,30 +74,29 @@ for episode in range(1, num_episodes + 1):
 
     # print(f'Player {players[winner].index} has won!', obs)
     if players[winner] != training_player:
-        final_reward = -5
+        final_reward = -1
     else:
-        final_reward = 5
+        final_reward = 1
         num_wins += 1
 
     episode_reward += final_reward
     episode_rewards_list.append(episode_reward)
-    training_player.update_memory(action, episode_reward, done)
-    if episode % 200 == 0:
-        print()
+    training_player.update_memory(episode_reward, np.argmax(training_player.get_action()), done)
     training_player.agent.train(done)
+    training_player.update_model_info()
 
     if episode % AGGREGATE_STATS_EVERY == 0 and episode != 1:
-        win_rate = num_wins / episode
-        end_time = time.time()
-        print('time for {} games: {}'.format(episode, end_time - start_time))
+        win_rate = num_wins / AGGREGATE_STATS_EVERY
         print('win rate after {} games: {}'.format(episode, win_rate))
-        training_player.update_tensorboard_stats(episode_rewards_list, win_rate, AGGREGATE_STATS_EVERY,
-                                                 time=(end_time - start_time))
+        training_player.update_tensorboard_stats(episode_rewards_list, win_rate, AGGREGATE_STATS_EVERY)
+
+        num_wins = 0
 
     training_player.handle_endgame()
     progress.append(num_wins / episode)
 
-fun.plot_array(progress, "training progress", x_label="number of games", y_label="win rate",
-               additional_infos=training_player.info_array)
+# fun.plot_array(progress, "training progress", x_label="number of games", y_label="win rate",
+#                additional_infos=training_player.info_array)
 
-training_player.agent.save_model(progress[-1])
+training_player.agent.save_model('train_run')
+print("final epsilon:", training_player.epsilon)
