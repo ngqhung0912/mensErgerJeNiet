@@ -5,6 +5,10 @@ from model.ModifiedTensorBoard import ModifiedTensorBoard as mtb
 global Q_player
 
 
+"""
+This class extends the base player class and implement an epsilon-greedy strategy in the handle move function. 
+"""
+
 class QPlayer(Player):
     def __init__(self, model_name: str, epsilon: float, episodes: int):
         super(QPlayer, self).__init__()
@@ -18,8 +22,8 @@ class QPlayer(Player):
         self.info_array = ['epsilon = {}'.format(self.epsilon),
                            'learning rate = {}'.format(self.agent.learning_rate),
                            'discount rate = {}'.format(self.agent.discount_rate),
-                           'loss function: false',
-                           'neural network = 21 - 42 - 25 - 4']
+                           'loss function: MAE',
+                           'neural network = 21 - 16x4 - 4']
 
     def handle_move(self, obs: list, info: dict) -> np.ndarray:
         self.index = info['player']

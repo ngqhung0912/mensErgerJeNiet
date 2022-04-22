@@ -1,6 +1,10 @@
 import numpy as np
 from collections import defaultdict
 
+"""
+This class serves as an abstract class for all type of player.  
+"""
+
 
 class Player:
     def __init__(self):
@@ -20,9 +24,17 @@ class Player:
         self.losses = []
         self.accuracy_list = []
 
+
     def load_model(self):
         pass
 
+    """
+    this function calculates the relative position of opponents' pawns, with regard to the current player's pawns. 
+    Input: Observation. 
+    Output: An array with 20 values, include: 
+    0-4: The current player's pawns' position. 
+    5-20: Two pawn closest behind within 12 steps, and two pawns closest in front within range 6.
+    """
     def calculate_relative_position(self, obs: list):
         player_obs = []
         relative_position = []
@@ -69,6 +81,10 @@ class Player:
     def handle_move(self, obs: list, info: dict):
         pass
 
+    """
+    this function normalize the nn input and add the dice value. 
+    """
+
     def handle_nn_input(self, pos: list):
 
         for i in range(len(pos)):
@@ -102,6 +118,10 @@ class Player:
 
         return
 
+    """
+    This function calculates the reward the player received. 
+    """
+
     def handle_reward(self, obs: list):
         reward = 0
 
@@ -111,7 +131,7 @@ class Player:
         current_obs = obs[self.index]
         try:
             if max(filter(lambda x: x < 40, current_obs)) > max(filter(lambda x: x < 40, self.previous_pos)):
-                # reward to moving closer to homebase                # reward to moving closer to homebase
+                # reward for moving closer to homebase
                 reward += 0.1
         except ValueError:
             pass
@@ -129,14 +149,14 @@ class Player:
         current_relative_position = np.array(current_relative_position).reshape((16, 1))
         for i in range(previous_relative_position.shape[0]):
             if 0 > previous_relative_position[i] > -6 > current_relative_position[i] != 0:
-                reward += 0.250
+                reward += 0.250     # reward for running away
 
-        if self.kicked:
+        if self.kicked:         # punish for being knocked.
             reward -= 0.25
             self.being_killed += 1
             self.kicked = False
 
-        for i in range(len(obs)):  # calculate if a piece is knocked
+        for i in range(len(obs)):  # calculate if an enemy's piece is knocked
             if i == self.index:
                 continue
             else:
@@ -159,6 +179,9 @@ class Player:
     def get_action(self):
         return self.previous_action
 
+    """
+    Update the tensorboard's stats.
+    """
     def update_tensorboard_stats(self, episode_rewards_list: list, win_rate: float, aggregate_stats):
         average_reward = sum(episode_rewards_list[-aggregate_stats:]) / len(
             episode_rewards_list[-aggregate_stats:])

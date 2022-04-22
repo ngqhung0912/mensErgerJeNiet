@@ -1,4 +1,3 @@
-from model.ModifiedTensorBoard import ModifiedTensorBoard as mtb
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
@@ -9,6 +8,9 @@ import tensorflow as tf
 import pickle
 from os import path
 
+"""
+This class serves as the Deep Q network agent. It contains the models and the replay memory.
+"""
 
 class Agent:
     def __init__(self, model_name: str, discount_rate: float, learning_rate: float, episodes: int, tensorboard,
@@ -47,7 +49,6 @@ class Agent:
             self.replay_memory = deque(maxlen=self.replay_memory_size)
 
         # Custom tensorboard object
-        # Custom tensorboard object
         self.tensorboard = tensorboard
 
         # Used to count when to update target network x with main network's weights
@@ -71,7 +72,6 @@ class Agent:
         return model
 
     # Adds step's data to a memory replay array
-    # (observation space, action, reward, new observation space, done)
     def update_replay_memory(self, transition: list):
         self.replay_memory.append(transition)
 
@@ -88,6 +88,7 @@ class Agent:
                                                                                        21)  # normalize
         current_qs_list = self.model.predict(current_states, batch_size=self.minibatch_size)
         # Get future states from minibatch, then query NN model for Q values
+
         # When using target network, query it, otherwise main network should be queried
         new_current_states = np.array([transition[3] for transition in minibatch]).reshape(self.minibatch_size,
                                                                                            21)  # normalize
@@ -99,7 +100,6 @@ class Agent:
         for index, (current_state, moved_pawn_index, reward, new_current_state, done) in enumerate(minibatch):
 
             # If not a terminal state, get new q from future states, otherwise set it to 0
-            # almost like with Q Learning, but we use just part of equation here
             max_future_q = np.max(future_qs_list[index])
             new_q = reward + self.discount_rate * max_future_q
 
