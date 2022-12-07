@@ -8,14 +8,30 @@ import tensorflow as tf
 import pickle
 from os import path
 
-"""
-This class serves as the Deep Q network agent. It contains the models and the replay memory.
-"""
 
 class Agent:
-    def __init__(self, model_name: str, discount_rate: float, learning_rate: float, episodes: int, tensorboard,
+    """
+    This class serves as the Deep Q network agent. It contains the models and the replay memory.
+    """
+    def __init__(self, model_name: str, discount_rate: float, learning_rate: float, tensorboard,
                  training: bool, model_dir=None):
-
+        """
+        initialization of the Agent class, which is the core engine of the Deep Q Learning player.
+        @param discount_rate: Discounting factor of future rewards.
+        @param learning_rate: learning rate of the model.
+        @param tensorboard: Tensorboard to log different hyperparameters.
+        @param training: True if this is a training run, false otherwise.
+        @param model_dir: if we want to load a pre-trained model in.
+        replay_memory_size:  How many 'experience' should the model have at the same time, i.e., at some point it will
+        ditch some learned knowledge to make space for new one.
+        min_replay_memory_size: minimum replay memory size to start sample minibatch.
+        minibatch_size: How many states got sampled from the replay memory size to train each time.
+        update_target_range:  How often the weight of the model got transfer to the main model's.
+        update_logs: How often the tensorboard got updated.
+        input_shape: Input layer's shape.
+        output_shape: output layer's shape.
+        optimizer: The optimizer method.
+        """
         self.replay_memory_size = 200000
         self.min_replay_memory_size = 100
         self.minibatch_size = 32
@@ -56,6 +72,17 @@ class Agent:
         self.model_info = None
 
     def create_model(self):
+        """
+        Create the Deep Learning model. Current architecture:
+        L1: 4x16,  RelU activation
+        L2: 16x16, ReLU activation
+        L3: 16x16, ReLU activation
+        L4: 16x16, ReLU activation
+        L5: 16x4,  Softmax activation
+        Loss Function: Mean Absolute Error
+        Metrics: Accuracy
+        Optimizer: Adam
+        """
         model = Sequential()
 
         model.add(Dense(16, input_dim=21, activation="relu"))
@@ -65,18 +92,30 @@ class Agent:
         model.add(Dense(16, input_dim=16, activation="relu"))
 
         model.add(Dense(4, input_dim=16,
-                        kernel_initializer="normal", activation="softmax"))
-
+                        kernel_initializer="normal", activation="softmax")
+        )
         model.compile(loss="mae", optimizer=self.optimizer, metrics=["accuracy"])
 
         return model
 
-    # Adds step's data to a memory replay array
     def update_replay_memory(self, transition: list):
+        """
+        Add step's data to a memory replay array.
+        @param transition: An array consists of:
+            [prev_nn_input: previous action taken,
+            moved_pawn_index: current state,
+            reward: reward earned,
+            current_nn_input: current action to be take,
+            done: if the game is finished]
+        """
         self.replay_memory.append(transition)
 
-    # Trains main network every step during episode
     def train(self, terminal_state):
+        """
+        Train the main network every step during episode.
+        @param terminal_state: If the game is done or not.
+        """
+
         # Start training only if certain number of samples is already saved
         if len(self.replay_memory) < self.min_replay_memory_size:
             return
@@ -84,8 +123,8 @@ class Agent:
         # Get a minibatch of random samples from memory replay table
         minibatch = random.sample(self.replay_memory, self.minibatch_size)
         # Get current states from minibatch, then query NN model for Q values
-        current_states = np.array([transition[0] for transition in minibatch]).reshape(self.minibatch_size,
-                                                                                       21)  # normalize
+        current_states = np.array([transition[0] for transition in minibatch]).reshape(self.minibatch_size, 21)
+
         current_qs_list = self.model.predict(current_states, batch_size=self.minibatch_size)
         # Get future states from minibatch, then query NN model for Q values
 
@@ -132,17 +171,27 @@ class Agent:
             self.target_model.set_weights(self.model.get_weights())
             self.target_update_counter = 0
 
-    # Queries main network for Q values given current observation space (environment state)
     def get_qs(self, state: list):
+        """
+        Queries main network for Q values given current observation space (environment state)
+        @param state: current state.
+        """
         state = np.array(state).reshape((1, 21))
         action = self.model.predict(state)
         return action
 
     def save_model(self, model_name):
+        """
+        Save the trained model, using pickle.
+        @param model_name: model's name.
+        """
         model_name = 'models/ludo' + model_name + '.model'
         self.model.save(model_name)
         with open("experience/experience.txt", "wb") as file:
             pickle.dump(self.replay_memory, file)
 
     def get_model_info(self):
+        """
+        Get the model's info, return from the model.fit function.
+        """
         return self.model_info

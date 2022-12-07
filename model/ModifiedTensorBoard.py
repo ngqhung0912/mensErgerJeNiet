@@ -2,11 +2,18 @@ from keras.callbacks import TensorBoard
 import tensorflow as tf
 import os
 
-
+"""
+Modify the original Tensorboard to log data from all episodes into 1 log file instead of multiple log files.
+"""
 class ModifiedTensorBoard(TensorBoard):
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self._should_write_train_graph = None
+        self._val_step = None
+        self._val_dir = None
+        self._train_step = None
+        self._train_dir = None
+        self.model = None
         self.step = 1
         self.writer = tf.summary.create_file_writer(self.log_dir)
         self._log_write_dir = self.log_dir

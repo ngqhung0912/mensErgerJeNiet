@@ -307,7 +307,6 @@ def eager_player(obs, info):
 
 
 def main():
-    print('testing')
     myplayers = [eager_player, random_player, random_player, random_player]
     # myplayers = [random_player]
     env = make(num_players=len(myplayers))

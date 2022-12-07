@@ -2,17 +2,20 @@ from Players.Player import Player
 import numpy as np
 from model.Agent import Agent
 from model.ModifiedTensorBoard import ModifiedTensorBoard as mtb
-global Q_player
 
-
-"""
-This class extends the base player class and implement an epsilon-greedy strategy in the handle move function. 
-"""
 
 class QPlayer(Player):
+    """
+    This class extends the base player class and implement an epsilon-greedy strategy in the handle move function.
+    """
     def __init__(self, model_name: str, epsilon: float, episodes: int):
+        """
+        @param model_name: Name of the model.
+        @param epsilon: The epsilon value for epsilon-greedy.
+        @param episodes:
+        """
         super(QPlayer, self).__init__()
-        self.agent = Agent(model_name, discount_rate=0.7, learning_rate=0.001, episodes=episodes, training=False,
+        self.agent = Agent(model_name, discount_rate=0.7, learning_rate=0.001, training=False,
                            model_dir='models/ludo1.model',
                            tensorboard=mtb(log_dir="logs/train_continue2".
                                            format(0.01, 0.95, episodes)))
@@ -26,6 +29,11 @@ class QPlayer(Player):
                            'neural network = 21 - 16x4 - 4']
 
     def handle_move(self, obs: list, info: dict) -> np.ndarray:
+        """
+        Handle move, with an epsilon-greedy strategy.
+        @param obs: Current state returned by the game engine.
+        @param info: Dictionary returned by the game engine, contains other players' states and the dice.
+        """
         self.index = info['player']
         self.dice = info['eyes']
         self.relative_position = Player.calculate_relative_position(self, obs)
@@ -37,8 +45,10 @@ class QPlayer(Player):
         return move
 
     def handle_endgame(self):
+        """
+        Handle when the game ends. Decay epsilon.
+        """
         if self.epsilon > self.min_epsilon:
             self.epsilon -= self.epsilon_decay
             self.epsilon = max(self.min_epsilon, self.epsilon)
         self.previous_obs = None
-
