@@ -18,7 +18,7 @@ class RandomPlayer(Player):
 def player(obs, info):
     """
     defines a random player: returns a random action as a (4,) numpy array
-regardless the game state
+    regardless the game state
     """
     # here goes your code
     # do not load your model here but use the main() function icm with a global variable

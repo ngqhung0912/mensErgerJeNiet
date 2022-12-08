@@ -27,7 +27,7 @@ class LoadedQPlayer(Player):
         self.info_array = [
             'learning rate = {}'.format(self.agent.learning_rate),
             'discount rate = {}'.format(self.agent.discount_rate),
-            'loss function: MAE',
+            'loss function: Categorical_CE',
             'neural network = 21 - 16x4 - 4']
 
     def handle_move(self, obs: list, info: dict) -> np.ndarray:

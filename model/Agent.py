@@ -13,12 +13,13 @@ class Agent:
     """
     This class serves as the Deep Q network agent. It contains the models and the replay memory.
     """
+
     def __init__(self, model_name: str, discount_rate: float, learning_rate: float, tensorboard,
                  training: bool, model_dir=None):
         """
         initialization of the Agent class, which is the core engine of the Deep Q Learning player.
         @param discount_rate: Discounting factor of future rewards.
-        @param learning_rate: learning rate of the model.
+        @param learning_rate: learning rate of the model.x
         @param tensorboard: Tensorboard to log different hyperparameters.
         @param training: True if this is a training run, false otherwise.
         @param model_dir: if we want to load a pre-trained model in.
@@ -74,12 +75,12 @@ class Agent:
     def create_model(self):
         """
         Create the Deep Learning model. Current architecture:
-        L1: 4x16,  RelU activation
+        L1: 21x16,  RelU activation
         L2: 16x16, ReLU activation
         L3: 16x16, ReLU activation
         L4: 16x16, ReLU activation
         L5: 16x4,  Softmax activation
-        Loss Function: Mean Absolute Error
+        Loss Function: Categorical CrossEntropy
         Metrics: Accuracy
         Optimizer: Adam
         """
@@ -93,8 +94,8 @@ class Agent:
 
         model.add(Dense(4, input_dim=16,
                         kernel_initializer="normal", activation="softmax")
-        )
-        model.compile(loss="mae", optimizer=self.optimizer, metrics=["accuracy"])
+                  )
+        model.compile(loss="categorical_crossentropy", optimizer=self.optimizer, metrics=["accuracy"])
 
         return model
 
@@ -102,10 +103,10 @@ class Agent:
         """
         Add step's data to a memory replay array.
         @param transition: An array consists of:
-            [prev_nn_input: previous action taken,
+            [prev_nn_input: previous state,
             moved_pawn_index: current state,
             reward: reward earned,
-            current_nn_input: current action to be take,
+            current_nn_input: current state,
             done: if the game is finished]
         """
         self.replay_memory.append(transition)
@@ -135,9 +136,8 @@ class Agent:
         input_batch = []
         output_batch = []
 
-        # Now we need to enumerate our batches
+        # enumerate over batches
         for index, (current_state, moved_pawn_index, reward, new_current_state, done) in enumerate(minibatch):
-
             # If not a terminal state, get new q from future states, otherwise set it to 0
             max_future_q = np.max(future_qs_list[index])
             new_q = reward + self.discount_rate * max_future_q
@@ -150,7 +150,7 @@ class Agent:
             input_batch.append(current_state)
             output_batch.append(current_qs)
 
-        # Fit on all samples as one batch, log only on terminal state
+        # Fit on all samples as one batch, log only on specified state
         self.model_info = self.model.fit(np.array(input_batch).reshape(self.minibatch_size, 21),
                                          np.array(output_batch).reshape(self.minibatch_size, 4),
                                          batch_size=self.minibatch_size,
